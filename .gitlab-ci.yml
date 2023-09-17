@@ -5,14 +5,14 @@ stages:
 
 before_script:
   - python3 -V
-  - pip install -r requirements.txt
 
 deploy_job:
   stage: deploy
   only:
     - main
   script:
-    - ssh $USER@$SERVER 'mkdir -p ~/projects/tgbots'
+    - ssh $USER@$SERVER 'mkdir -p ~/projects/tgbots/stine'
     - ssh $USER@$SERVER 'cd ~/projects/tgbots && git pull origin main'
+    - ssh $USER@$SERVER 'pip3 install -r ~/projects/tgbots/stine/requirements.txt'  # Moved this here
     - ssh $USER@$SERVER 'tmux kill-session -t tgstinebot-session || true'
     - ssh $USER@$SERVER 'cd ~/projects/tgbots/stine && tmux new-session -d -s tgstinebot-session "python3 bot.py"'
