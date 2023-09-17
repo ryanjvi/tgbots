@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
-API_ID = os.getenv("API_ID")
-API_HASH = os.getenv("API_HASH")
-API_TOKEN = os.getenv("API_TOKEN")
+API_ID = os.getenv("STINE_API_ID")
+API_HASH = os.getenv("STINE_API_HASH")
+API_TOKEN = os.getenv("STINE_API_TOKEN")
 
 # Initialize Telethon client
 client = TelegramClient('anon', API_ID, API_HASH)
@@ -36,14 +36,18 @@ client = TelegramClient('anon', API_ID, API_HASH)
 async def handler(event):
     global user_joined_count, user_added_count
     try:
-        if event.user_joined:
-            user_joined_count += 1
-        if event.user_added:
-            user_added_count += 1
-        write_stats_to_file()  # Write stats after each update
-
         username = event.user.username if event.user.username else event.user.first_name
-        await event.reply(f'@{username} is no longer a spectator.')
+        formatted_username = f"\`@{username}\`"  # Wrap username in backticks
+        if event.user_joined or event.user_added:
+            if event.user_joined:
+                user_joined_count += 1
+                await event.reply(f"{formatted_username} \`is no longer a spectator.\`")
+            if event.user_added:
+                user_added_count += 1
+                await event.reply(f"{formatted_username} \`is no longer a spectator.\`")
+            write_stats_to_file()  # Write stats after each update
+        elif event.user_left or event.user_kicked:
+            await event.reply(f"{formatted_username} \`is a spectator again.\`")
     except Exception as e:
         logger.error(f"An error occurred in handler: {e}")
 
@@ -76,11 +80,14 @@ async def main():
     await client.start(bot_token=API_TOKEN)
     await client.run_until_disconnected()
 
-if __name__ == '__main__':
+async def main_loop():
     while True:
         try:
-            client.loop.run_until_complete(main())
+            await main()
         except Exception as e:
             logger.error(f"Bot encountered an error: {e}")
             logger.info("Restarting bot in 5 seconds...")
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
+
+if __name__ == '__main__':
+    asyncio.run(main_loop())
