@@ -13,6 +13,9 @@ deploy_job:
   script:
     - ssh $USER@$SERVER 'mkdir -p ~/projects/tgbots/stine'
     - ssh $USER@$SERVER 'cd ~/projects/tgbots && git pull origin main'
-    - ssh $USER@$SERVER 'pip3 install -r ~/projects/tgbots/stine/requirements.txt'  # Moved this here
+    - ssh $USER@$SERVER 'pip3 install -r ~/projects/tgbots/stine/requirements.txt'
     - ssh $USER@$SERVER 'tmux kill-session -t tgstinebot-session || true'
+    - ssh $USER@$SERVER 'export STINE_API_HASH=$STINE_API_HASH'
+    - ssh $USER@$SERVER 'export STINE_API_ID=$STINE_API_ID'
+    - ssh $USER@$SERVER 'export STINE_API_TOKEN=$STINE_API_TOKEN'
     - ssh $USER@$SERVER 'cd ~/projects/tgbots/stine && tmux new-session -d -s tgstinebot-session "python3 bot.py"'
