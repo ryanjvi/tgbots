@@ -11,11 +11,13 @@ deploy_job:
   only:
     - main
   script:
-    - ssh $USER@$SERVER 'mkdir -p ~/projects/tgbots/stine'
-    - ssh $USER@$SERVER 'cd ~/projects/tgbots && git pull origin main'
-    - ssh $USER@$SERVER 'pip3 install -r ~/projects/tgbots/stine/requirements.txt'
-    - ssh $USER@$SERVER 'tmux kill-session -t tgstinebot-session || true'
-    - ssh $USER@$SERVER 'export STINE_API_HASH=$STINE_API_HASH'
-    - ssh $USER@$SERVER 'export STINE_API_ID=$STINE_API_ID'
-    - ssh $USER@$SERVER 'export STINE_API_TOKEN=$STINE_API_TOKEN'
-    - ssh $USER@$SERVER 'cd ~/projects/tgbots/stine && tmux new-session -d -s tgstinebot-session "python3 bot.py"'
+    - echo "Starting Deploy Job"
+    - ssh $USER@$SERVER 'echo "Making project directory" && mkdir -p ~/projects/tgbots/stine'
+    - ssh $USER@$SERVER 'echo "Pulling latest changes" && cd ~/projects/tgbots && git pull origin main'
+    - ssh $USER@$SERVER 'echo "Installing requirements" && pip3 install -r ~/projects/tgbots/stine/requirements.txt'
+    - ssh $USER@$SERVER 'echo "Killing any existing tmux sessions" && tmux kill-session -t tgstinebot || true'
+    - ssh $USER@$SERVER 'echo "Exporting environment variables" && export STINE_API_HASH=$STINE_API_HASH && export STINE_API_ID=$STINE_API_ID && export STINE_API_TOKEN=$STINE_API_TOKEN'
+    - ssh $USER@$SERVER 'echo "Changing directory" && cd ~/projects/tgbots/stine'
+    - ssh $USER@$SERVER 'echo "Creating new tmux session" && tmux new-session -d -s tgstinebot'
+    - ssh $USER@$SERVER 'echo "Sending keys to tmux session" && tmux send-keys -t tgstinebot "python3 bot.py" C-m'
+    - echo "Deploy job completed"
