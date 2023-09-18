@@ -18,5 +18,7 @@ deploy_job:
     - ssh $USER@$SERVER 'echo "Killing any existing tmux sessions" && tmux kill-session -t tgstinebot || true'
     - ssh $USER@$SERVER 'echo "Exporting environment variables to .env file" && echo "STINE_API_ID=$STINE_API_ID\nSTINE_API_HASH=$STINE_API_HASH\nSTINE_API_TOKEN=$STINE_API_TOKEN" > ~/projects/tgbots/stine/.env'
     - ssh $USER@$SERVER 'echo "Creating new tmux session" && tmux new-session -d -s tgstinebot'
-    - ssh $USER@$SERVER 'echo "Sending keys to tmux session" && tmux send-keys -t tgstinebot "cd ~/projects/tgbots/stine && source .env && python3 bot.py" C-m'
+    - ssh $USER@$SERVER 'echo "Changing directory" && tmux send-keys -t tgstinebot "cd ~/projects/tgbots/stine" C-m'
+    - ssh $USER@$SERVER 'echo "Sourcing environment variables" && tmux send-keys -t tgstinebot "source .env" C-m'
+    - ssh $USER@$SERVER 'echo "Executing Python Script" && tmux send-keys -t tgstinebot "python3 bot.py" C-m'
     - echo "Deploy job completed"
